@@ -1,0 +1,102 @@
+import sqlite3
+
+# Connect to database (creates milk_system.db if it doesn't exist)
+conn = sqlite3.connect("milk_system.db")
+cursor = conn.cursor()
+
+# =========================
+# TABLES
+# =========================
+
+# Centers
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS centers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    location TEXT NOT NULL
+)
+""")
+
+# Farmers
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS farmers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    center_id INTEGER,
+    FOREIGN KEY(center_id) REFERENCES centers(id)
+)
+""")
+
+# Milk Collection
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS milk_collection (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    farmer_id INTEGER,
+    date TEXT NOT NULL,
+    quantity REAL NOT NULL,
+    FOREIGN KEY(farmer_id) REFERENCES farmers(id)
+)
+""")
+
+# Products (e.g. Packed Milk, Yoghurt)
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    batch_number TEXT NOT NULL,
+    quantity REAL NOT NULL,
+    date TEXT NOT NULL
+)
+""")
+
+# Orders
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER,
+    customer_name TEXT NOT NULL,
+    quantity REAL NOT NULL,
+    date TEXT NOT NULL,
+    FOREIGN KEY(product_id) REFERENCES products(id)
+)
+""")
+
+# Order Payments
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS order_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER,
+    amount REAL NOT NULL,
+    date TEXT NOT NULL,
+    FOREIGN KEY(order_id) REFERENCES orders(id)
+)
+""")
+
+# Deliveries
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS deliveries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER,
+    delivery_date TEXT NOT NULL,
+    status TEXT NOT NULL,
+    FOREIGN KEY(order_id) REFERENCES orders(id)
+)
+""")
+
+# Farmer Payments
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS farmer_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    farmer_id INTEGER,
+    amount REAL NOT NULL,
+    date TEXT NOT NULL,
+    FOREIGN KEY(farmer_id) REFERENCES farmers(id)
+)
+""")
+
+# =========================
+# SAVE AND CLOSE
+# =========================
+conn.commit()
+conn.close()
